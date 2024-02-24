@@ -28,17 +28,17 @@ wiringpi.pinMode(pin3, 1)            # Set pin to mode 1 ( OUTPUT )
 
 #  Practice 2
 
-pins = [pin,pin1,pin2,pin3]
+# pins = [pin,pin1,pin2,pin3]
 
-wiringpi.digitalWrite(pin, 1)
-wiringpi.digitalWrite(pin1, 1)
-wiringpi.digitalWrite(pin2, 1)
-wiringpi.digitalWrite(pin3, 1)
-time.sleep(0.1)
-wiringpi.digitalWrite(pin,0 )
-wiringpi.digitalWrite(pin1, 0)
-wiringpi.digitalWrite(pin2, 0)
-wiringpi.digitalWrite(pin3, 0)
+# wiringpi.digitalWrite(pin, 1)
+# wiringpi.digitalWrite(pin1, 1)
+# wiringpi.digitalWrite(pin2, 1)
+# wiringpi.digitalWrite(pin3, 1)
+# time.sleep(0.1)
+# wiringpi.digitalWrite(pin,0 )
+# wiringpi.digitalWrite(pin1, 0)
+# wiringpi.digitalWrite(pin2, 0)
+# wiringpi.digitalWrite(pin3, 0)
 
 #  Practice 4
 # pins = [pin,pin1,pin2,pin3,pin3,pin2,pin1,pin]
@@ -71,29 +71,7 @@ wiringpi.digitalWrite(pin3, 0)
 
 
 
-# wiringpi.digitalWrite(pin, 1)wiringpi.digitalWrite(pin, 1)    # Write 1 ( HIGH ) to pin
-# wiringpi.digitalWrite(pin2, 1)    # Write 1 ( HIGH ) to pin
-# time.sleep(0.5)
-# wiringpi.digitalWrite(pin, 0)    # Write 1 ( HIGH ) to pin
-# wiringpi.digitalWrite(pin2, 0)  
-# time.sleep(0.5)
-# wiringpi.digitalWrite(pin1, 1)    # Write 1 ( HIGH ) to pin
-# wiringpi.digitalWrite(pin3, 1) 
-# time.sleep(0.5)
-# wiringpi.digitalWrite(pin1, 0)    # Write 1 ( HIGH ) to pin
-# wiringpi.digitalWrite(pin3, 0) 
-# time.sleep(0.5)
-# wiringpi.digitalWrite(pin, 1)    # Write 1 ( HIGH ) to pin
-# wiringpi.digitalWrite(pin2, 1)    # Write 1 ( HIGH ) to pin
-# time.sleep(0.5)
-# wiringpi.digitalWrite(pin, 0)    # Write 1 ( HIGH ) to pin
-# wiringpi.digitalWrite(pin2, 0)  
-# time.sleep(0.5)
-# wiringpi.digitalWrite(pin1, 1)    # Write 1 ( HIGH ) to pin
-# wiringpi.digitalWrite(pin3, 1) 
-# time.sleep(0.5)
-# wiringpi.digitalWrite(pin1, 0)    # Write 1 ( HIGH ) to pin
-# wiringpi.digitalWrite(pin3, 0) 
+
 #cleanup
 print("Done")
 
