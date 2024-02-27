@@ -69,8 +69,13 @@ wiringpi.pinMode(pin3, 1)            # Set pin to mode 1 ( OUTPUT )
 # control_leds(group2, 0)  # Turn off group 2
 # time.sleep(0.5)
 
+# Motor
+pins = [pin,pin1,pin2,pin3,pin,pin1,pin2,pin3,pin,pin1,pin2,pin3,pin,pin1,pin2,pin3,]
 
-
+for i in pins:
+    wiringpi.digitalWrite(i,1)
+    time.sleep(0.5)
+    wiringpi.digitalWrite(i, 0) 
 
 #cleanup
 print("Done")
