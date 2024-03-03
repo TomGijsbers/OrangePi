@@ -2,9 +2,7 @@ import time
 import wiringpi
 
 # SETUP
-print("Start")
-
-
+print("Start") 
 # R=1K
 pinSwitch = 1
 wiringpi.wiringPiSetup() 
