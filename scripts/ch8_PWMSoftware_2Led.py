@@ -19,6 +19,7 @@ wiringpi.wiringPiSetup()
 wiringpi.softPwmCreate(pin2, 0, 100)
 wiringpi.softPwmCreate(pin5, 0, 100)
 
+
 # Start PWM
 wiringpi.softPwmWrite(pin2, 0)
 wiringpi.softPwmWrite(pin5, 100)
