@@ -5,14 +5,46 @@ import paho.mqtt.client as mqtt
 import wiringpi
 
 
-
-
 # Create an I2C bus object for both sensors
 bus = SMBus(0)
 
 # Sensor addresses
 address_bh1750 = 0x23  # BH1750 I2C address
 address_bmp280 = 0x77  # BMP280 I2C address
+
+interval = 15  # Sample period in seconds
+
+# MQTT settings
+MQTT_HOST = "mqtt3.thingspeak.com"
+MQTT_PORT = 1883
+MQTT_KEEPALIVE_INTERVAL = 120
+MQTT_TOPIC = "channels/2463041/publish"
+MQTT_CLIENT_ID = "BxQIESYuEAscMDYgIC8jNig"
+MQTT_USER = "BxQIESYuEAscMDYgIC8jNig"
+MQTT_PWD = "B0Lmy0qD0/dcSerkI3L3U7eY"
+
+# Mosquitto MQTT instellingen
+MOSQUITTO_HOST = "localhost"
+MOSQUITTO_PORT = 1883
+MOSQUITTO_TOPIC = "GP/IoT"
+
+
+
+
+
+pwm_value = 0  # Initialisatie van pwm_value buiten de while-loop
+
+pwm_pin =2
+# Toewijzen van een pin aan de ADC.
+pin_CS_adc = 16  
+wiringpi.wiringPiSetup()
+ # SPI Setup.
+wiringpi.wiringPiSPISetupMode(1, 0, 500000, 0) #(channel, port, speed, mode)
+# Initiatie van een softwarematige PWM op pwm_pin met startwaarde 0 en range tot 100.
+wiringpi.softPwmCreate(pwm_pin, 0, 100)
+wiringpi.pinMode(pin_CS_adc, wiringpi.OUTPUT)
+wiringpi.pinMode(pwm_pin, wiringpi.OUTPUT)
+
 
 # Setup BH1750
 def setup_bh1750(bus, address):
@@ -47,32 +79,6 @@ def readadc(adcnum):
 
 
 
-
-# Setup BMP280
-bmp280 = BMP280(i2c_addr=address_bmp280, i2c_dev=bus)
-interval = 15  # Sample period in seconds
-
-# MQTT settings
-MQTT_HOST = "mqtt3.thingspeak.com"
-MQTT_PORT = 1883
-MQTT_KEEPALIVE_INTERVAL = 120
-MQTT_TOPIC = "channels/2463041/publish"
-MQTT_CLIENT_ID = "BxQIESYuEAscMDYgIC8jNig"
-MQTT_USER = "BxQIESYuEAscMDYgIC8jNig"
-MQTT_PWD = "B0Lmy0qD0/dcSerkI3L3U7eY"
-
-# Mosquitto MQTT instellingen
-MOSQUITTO_HOST = "localhost"
-MOSQUITTO_PORT = 1883
-MOSQUITTO_TOPIC = "GP/IoT"
-
-
-
-
-# desired_temperature = 25.0  # Gewenste temperatuur in graden Celsius
-# desired_pressure = 1013.25  # Gewenste druk in hPa
-# desired_brightness = 500.0  # Gewenste helderheid in Lux
-
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected OK with result code " + str(rc))
@@ -84,6 +90,11 @@ def on_disconnect(client, userdata, flags, rc=0):
 
 def on_message(client, userdata, msg):
     print("Received a message on topic: " + msg.topic + "; message: " + msg.payload)
+
+# Setup BMP280
+bmp280 = BMP280(i2c_addr=address_bmp280, i2c_dev=bus)
+interval = 15  # Sample period in seconds
+
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, MQTT_CLIENT_ID)
 client.username_pw_set(MQTT_USER, MQTT_PWD)
@@ -99,25 +110,10 @@ client.loop_start()
 setup_bh1750(bus, address_bh1750)  # Prepare BH1750 for measurements
 
 
-# Maak een MQTT client voor Mosquitto
-# mosquitto_client = mqtt.Client()
-# mosquitto_client.connect(MOSQUITTO_HOST, MOSQUITTO_PORT, 60)
 
 
 
-pwm_pin =2
-# Toewijzen van een pin aan de ADC.
-pin_CS_adc = 16  
-wiringpi.wiringPiSetup()
- # SPI Setup.
-wiringpi.wiringPiSPISetupMode(1, 0, 500000, 0) #(channel, port, speed, mode)
-# Initiatie van een softwarematige PWM op pwm_pin met startwaarde 0 en range tot 100.
-wiringpi.softPwmCreate(pwm_pin, 0, 100)
-wiringpi.pinMode(pin_CS_adc, wiringpi.OUTPUT)
-wiringpi.pinMode(pwm_pin, wiringpi.OUTPUT)
 
-
-pwm_value = 0  # Initialisatie van pwm_value buiten de while-loop
 
 
 while True:
@@ -128,51 +124,25 @@ while True:
     # Meet lichtniveau van BH1750
     light_level = round(get_light_level(bus, address_bh1750), 2)
 
-    # print("Temperature: %4.1f°C, Pressure: %4.1fhPa, Light: %4.1fLux" % (bmp280_temperature, bmp280_pressure, light_level))
+    print("Temperature: %4.1f°C, Pressure: %4.1fhPa, Light: %4.1fLux" % (bmp280_temperature, bmp280_pressure, light_level))
 
     # Creëer de MQTT data structuur inclusief gemeten
     MQTT_DATA = "field1={}&field2={}&field3={}&status=MQTTPUBLISH".format(
         bmp280_temperature, bmp280_pressure, light_level,
         
     )
-    # print(MQTT_DATA)
+    print(MQTT_DATA)
 
-# Laagste = rood
-# Midden = groen
-# Hoogste = blauw
-
-
-    # if (light_level < 50):
-    #     wiringpi.digitalWrite(pwm_pin,0)
-    # elif (light_level > 50 and light_level < 80):
-    #     wiringpi.digitalWrite(pwm_pin,0)
-    # else: 
-    #     wiringpi.digitalWrite(pwm_pin,1)
 
     ActivateADC()
     potmetervalue = readadc(0)  # Nu direct van 0 tot 100
     DeactivateADC()
        
-       # Waarde van de output herberekenen.
-    # pwm_value = int((potmetervalue / 1023.0) * 100)
- 
-       # PWM waarde aan een LED toekennen.
-    # if(pwm_value < 30):
-    #     print("PWM value:", pwm_value)
+  
  
     print ("Potentiometer value:", potmetervalue, "PWM value:", pwm_value)
 
-        # Bereken het verschil tussen gewenste lux (potentiometer) en gemeten lux
-    # lux_difference = potmetervalue - light_level
-
-    # # Pas de pwm_value aan op basis van het verschil
-    # if lux_difference > 0:
-    #     pwm_value = min(100, pwm_value + 10)  # Verhoog als het gemeten luxniveau te laag is
-    # elif lux_difference < 0:
-    #     pwm_value = max(0, pwm_value - 10)  # Verlaag als het gemeten luxniveau te hoog is
-
-    # # Pas de nieuwe PWM-waarde toe op de LED
-    # wiringpi.softPwmWrite(pwm_pin, pwm_value)
+    
 
 
 # Bereken het verschil tussen gewenste lux (potentiometer) en gemeten lux
