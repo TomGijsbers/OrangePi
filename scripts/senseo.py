@@ -163,15 +163,37 @@ while True:
     print ("Potentiometer value:", potmetervalue, "PWM value:", pwm_value)
 
         # Bereken het verschil tussen gewenste lux (potentiometer) en gemeten lux
+    # lux_difference = potmetervalue - light_level
+
+    # # Pas de pwm_value aan op basis van het verschil
+    # if lux_difference > 0:
+    #     pwm_value = min(100, pwm_value + 10)  # Verhoog als het gemeten luxniveau te laag is
+    # elif lux_difference < 0:
+    #     pwm_value = max(0, pwm_value - 10)  # Verlaag als het gemeten luxniveau te hoog is
+
+    # # Pas de nieuwe PWM-waarde toe op de LED
+    # wiringpi.softPwmWrite(pwm_pin, pwm_value)
+
+
+# Bereken het verschil tussen gewenste lux (potentiometer) en gemeten lux
     lux_difference = potmetervalue - light_level
 
-    # Pas de pwm_value aan op basis van het verschil
-    if lux_difference > 0:
-        pwm_value = min(100, pwm_value + 10)  # Verhoog als het gemeten luxniveau te laag is
-    elif lux_difference < 0:
-        pwm_value = max(0, pwm_value - 10)  # Verlaag als het gemeten luxniveau te hoog is
+# Stel een drempel in voor het gebruik van kleine stappen
+    small_step_threshold = 10  # De drempelwaarde waarbij we overschakelen naar kleinere stappen
 
-    # Pas de nieuwe PWM-waarde toe op de LED
+# Kies de stapgrootte op basis van het verschil
+    if abs(lux_difference) <= small_step_threshold:
+        step_size = 2  # Gebruik een kleine stapgrootte dicht bij het doel
+    else:
+        step_size = 10  # Gebruik een grotere stapgrootte als het verschil groot is
+
+# Pas de pwm_value aan op basis van het verschil en de stapgrootte
+    if lux_difference > 0:
+        pwm_value = min(100, pwm_value + step_size)  # Verhoog als het gemeten luxniveau te laag is
+    elif lux_difference < 0:
+        pwm_value = max(0, pwm_value - step_size)  # Verlaag als het gemeten luxniveau te hoog is
+
+# Pas de nieuwe PWM-waarde toe op de LED
     wiringpi.softPwmWrite(pwm_pin, pwm_value)
 
     # Print de waarden voor debugging
