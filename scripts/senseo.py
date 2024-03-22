@@ -30,8 +30,6 @@ MOSQUITTO_TOPIC = "GP/IoT"
 
 
 
-
-
 pwm_value = 0  # Initialisatie van pwm_value buiten de while-loop
 
 pwm_pin =2
@@ -110,12 +108,6 @@ client.loop_start()
 setup_bh1750(bus, address_bh1750)  # Prepare BH1750 for measurements
 
 
-
-
-
-
-
-
 while True:
     # Meet data van BMP280
     bmp280_temperature = round(bmp280.get_temperature(), 2)
@@ -131,18 +123,13 @@ while True:
         bmp280_temperature, bmp280_pressure, light_level,
         
     )
-    print(MQTT_DATA)
-
+    # print(MQTT_DATA)
 
     ActivateADC()
     potmetervalue = readadc(0)  # Nu direct van 0 tot 100
     DeactivateADC()
-       
-  
  
-    print ("Potentiometer value:", potmetervalue, "PWM value:", pwm_value)
-
-    
+    # print ("Potentiometer value:", potmetervalue, "PWM value:", pwm_value)
 
 
 # Bereken het verschil tussen gewenste lux (potentiometer) en gemeten lux
