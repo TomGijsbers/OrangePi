@@ -1,0 +1,107 @@
+import wiringpi
+import time
+
+
+# Definieer de pinnummers voor de verschillende componenten
+pinPWM = 2
+pinBesturing = 3
+pin_CS_ADC = 16
+pinRood = 4
+pinGroen = 6
+pinBlauw = 9
+pinTrigger = 0
+pinEcho = 1
+
+# Functies om de ADC te activeren/deactiveren voor analoge lezingen
+def ActiveerADC():
+    wiringpi.digitalWrite(pin_CS_ADC, 0) # Activeer ADC met CS
+    time.sleep(0.000005)
+
+def DeactiveerADC():
+    wiringpi.digitalWrite(pin_CS_ADC, 1) # Deactiveer ADC met CS
+    time.sleep(0.000005)
+# Lees een waarde van een specifiek ADC kanaal
+def LeesADC(adcNum):
+    if ((adcNum > 7) or (adcNum < 0)):
+        return -1
+    revLen, recvData = wiringpi.wiringPiSPIDataRW(1, bytes([1,(8+adcNum)<<4,0]))
+    time.sleep(0.000005)
+    adcUit = ((recvData[1]&3) << 8) + recvData[2]
+    return adcUit
+
+#  Een eenvoudige functie om een LED te laten knipperen
+def Knipper(_pin):
+    wiringpi.digitalWrite(_pin, 1) # Schrijf 1 (HOOG) naar pin
+    time.sleep(0.5)
+    wiringpi.digitalWrite(_pin, 0) # Schrijf 0 (LAAG) naar pin
+    time.sleep(0.5)
+
+# Initialisatie van de GPIO-pinnen en de SPI-communicatie voor de ADC
+wiringpi.wiringPiSetup()
+wiringpi.pinMode(pin_CS_ADC, 1) # Stel ce in op modus 1 (UITVOER)
+wiringpi.wiringPiSPISetupMode(1, 0, 500000, 0) # (kanaal, poort, snelheid, modus)
+wiringpi.softPwmCreate(pinPWM, 0, 100)
+wiringpi.softPwmWrite(pinPWM, 0)
+wiringpi.pinMode(pinBesturing, 1) # Stel pin in op modus 1 (UITVOER)
+wiringpi.pinMode(pinRood, 1) # Stel pin in op modus 1 (UITVOER)
+wiringpi.pinMode(pinGroen, 1) # Stel pin in op modus 1 (UITVOER)
+wiringpi.pinMode(pinBlauw, 1) # Stel pin in op modus 1 (UITVOER)
+wiringpi.pinMode(pinEcho, 0) # Stel pin in op modus 0 (INVOER)
+wiringpi.pinMode(pinTrigger, 1) # Stel pin in op modus 1 (UITVOER)
+
+# Hoofdlus
+try:
+    while True:
+        # Activeer de ADC, lees een waarde, en deactiveer daarna
+        ActiveerADC()
+        tmp0 = LeesADC(0) # Lees de waarde van ADC kanaal 0 (potentiometer)
+        DeactiveerADC()
+        
+        pwmWaarde = int((tmp0 / 1023.0) * 100)
+        print("Potentiemeter:", tmp0)
+        
+         # Pas de PWM-waarde aan gebaseerd op de potentiometer
+        wiringpi.softPwmWrite(pinPWM, tmp0)
+        if (tmp0 < 500):
+            Knipper(pinBesturing)
+        else:
+            wiringpi.digitalWrite(pinBesturing, 0)
+        
+         # Activeer de ultrasone sensor en meet de afstand
+        wiringpi.digitalWrite(pinTrigger, 1)
+        time.sleep(0.00001)
+        wiringpi.digitalWrite(pinTrigger, 0)
+        while (wiringpi.digitalRead(pinEcho) == 0):
+            signaalHoog = time.time()
+        while (wiringpi.digitalRead(pinEcho) == 1):
+            signaalLaag = time.time()
+        tijdVerstreken = signaalLaag - signaalHoog
+        afstand = tijdVerstreken * 17000
+        afstand = round(afstand, 1)
+        
+        # Meting is op invloed van de kleur van de led
+        ledKleur = "Onbekend"  # Voor het geval geen enkele conditie waar is
+        if (afstand < 50):
+            wiringpi.digitalWrite(pinGroen, 0)
+            wiringpi.digitalWrite(pinBlauw, 0)
+            wiringpi.digitalWrite(pinRood, 1)
+            ledKleur = "Rood"
+        elif (50 < afstand < 80):
+            wiringpi.digitalWrite(pinGroen, 1)
+            wiringpi.digitalWrite(pinBlauw, 0)
+            wiringpi.digitalWrite(pinRood, 0)
+            ledKleur = "Groen"
+        else:
+            wiringpi.digitalWrite(pinGroen, 0)
+            wiringpi.digitalWrite(pinBlauw, 1)
+            wiringpi.digitalWrite(pinRood, 0)
+            ledKleur = "Blauw"
+        
+        # Print de gemeten afstand en de geactiveerde LED kleur
+        print(f'Afstand: {afstand} cm, Geactiveerde LED kleur: {ledKleur}')
+        
+        time.sleep(0.2)
+
+except KeyboardInterrupt:
+    DeactiveerADC()
+    print("\nProgramma beëindigd")
